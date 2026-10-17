@@ -1,0 +1,215 @@
+seed: 0
+model:
+  name: Qwen/Qwen2.5-3B-Instruct
+  dtype: bfloat16
+  device: cuda
+plastic:
+  max_fraction: 0.05
+  postsynaptic: error
+  update_norm: adam
+  decay_enabled: true
+  homeo_enabled: true
+  updates_enabled: true
+  groups:
+    hdeltaH:
+      patterns:
+      - model.layers.{L}.self_attn.q_proj
+      - model.layers.{L}.self_attn.k_proj
+      - model.layers.{L}.self_attn.v_proj
+      - model.layers.{L}.self_attn.o_proj
+      layers:
+      - -1
+      - -2
+      - -3
+      - -4
+      - -5
+      - -6
+      - -7
+      - -8
+      - -9
+      eta: 0.0001
+      decay: 0.004
+      budget: 0.03
+      homeo_mode: global
+rem:
+  enabled: true
+  every: 200
+  steps: 8
+  batch: 8
+  seq_len: 32
+  eta: 0.25
+  postsynaptic: delta
+  threshold: 0.0
+  probe_around: false
+task:
+  name: workspace
+  n_packages: 6
+  n_overrides: 2
+  depth:
+  - 1
+  - 2
+  latency_ms: 750
+  sleep: false
+  tagged: true
+  rules:
+    A:
+      seed: 11
+      area: libs
+    B:
+      seed: 22
+      area: libs
+    C:
+      seed: 33
+      area: libs
+    D:
+      seed: 44
+      area: libs
+  tag_map:
+    A: core-auth
+    B: core-audit
+    C: core-audio
+    D: core-author
+stream:
+  phases:
+  - rule: A
+    puzzles: 25
+  - rule: B
+    puzzles: 25
+  - rule: C
+    puzzles: 25
+  - rule: D
+    puzzles: 25
+  - rule: A
+    puzzles: 25
+  - rule: B
+    puzzles: 25
+  - rule: C
+    puzzles: 25
+  - rule: D
+    puzzles: 25
+  - rule: A
+    puzzles: 25
+  - rule: B
+    puzzles: 25
+  - rule: C
+    puzzles: 25
+  - rule: D
+    puzzles: 25
+  - rule: A
+    puzzles: 25
+  - rule: B
+    puzzles: 25
+  - rule: C
+    puzzles: 25
+  - rule: D
+    puzzles: 25
+  - rule: A
+    puzzles: 25
+  - rule: B
+    puzzles: 25
+  - rule: C
+    puzzles: 25
+  - rule: D
+    puzzles: 25
+  - rule: A
+    puzzles: 25
+  - rule: B
+    puzzles: 25
+  - rule: C
+    puzzles: 25
+  - rule: D
+    puzzles: 25
+  - rule: A
+    puzzles: 25
+  - rule: B
+    puzzles: 25
+  - rule: C
+    puzzles: 25
+  - rule: D
+    puzzles: 25
+  - rule: A
+    puzzles: 25
+  - rule: B
+    puzzles: 25
+  - rule: C
+    puzzles: 25
+  - rule: D
+    puzzles: 25
+  - rule: A
+    puzzles: 25
+  - rule: B
+    puzzles: 25
+  - rule: C
+    puzzles: 25
+  - rule: D
+    puzzles: 25
+  - rule: A
+    puzzles: 25
+  - rule: B
+    puzzles: 25
+  - rule: C
+    puzzles: 25
+  - rule: D
+    puzzles: 25
+  - rule: A
+    puzzles: 25
+  - rule: B
+    puzzles: 25
+  - rule: C
+    puzzles: 25
+  - rule: D
+    puzzles: 25
+  - rule: A
+    puzzles: 25
+  - rule: B
+    puzzles: 25
+  - rule: C
+    puzzles: 25
+  - rule: D
+    puzzles: 25
+  - rule: A
+    puzzles: 25
+  - rule: B
+    puzzles: 25
+  - rule: C
+    puzzles: 25
+  - rule: D
+    puzzles: 25
+  - rule: A
+    puzzles: 25
+  - rule: B
+    puzzles: 25
+  - rule: C
+    puzzles: 25
+  - rule: D
+    puzzles: 25
+  batch_size: 4
+  n_shots: 2
+  rule_text: true
+  self_generate: true
+  verifier_mode: honest
+  verifier_fpr: 0.0
+  on_wrong: teach
+  consolidate: verified
+  exposure: both
+  consolidation_repeats: 1
+  probe_every: 50
+  probe_n: 48
+  probe_depth: false
+  seen_window: 48
+monitor:
+  enabled: true
+  every: 1
+  threshold: 0.15
+  deliberate_frozen: true
+  rollback: false
+  confidence: true
+  save_delta: true
+eval:
+  lm_reference: data/lm_reference.txt
+  cloze: data/cloze.json
+  lm_windows: 24
+  compile_threshold: 0.8
+_comment: Active run with per-query confidence capture and a saved dW, so any gate
+  threshold question is answered offline without retraining. monitor.every=1 because
+  the agree_wrong subset is the scarce sample, not the query pool.

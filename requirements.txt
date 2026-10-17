@@ -1,0 +1,9 @@
+torch>=2.9
+transformers>=4.50
+accelerate
+safetensors
+huggingface_hub
+numpy
+matplotlib
+pyyaml
+peft

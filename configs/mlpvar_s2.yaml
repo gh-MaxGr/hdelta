@@ -1,0 +1,78 @@
+seed: 2
+model:
+  name: Qwen/Qwen2.5-3B-Instruct
+  dtype: bfloat16
+  device: cuda
+plastic:
+  max_fraction: 0.05
+  postsynaptic: error
+  update_norm: adam
+  decay_enabled: true
+  homeo_enabled: true
+  updates_enabled: true
+  groups:
+    hdeltaG:
+      patterns:
+      - model.layers.{L}.mlp.down_proj
+      eta: 0.0001
+      decay: 0.004
+      budget: 0.03
+      homeo_mode: global
+      layers:
+      - -1
+      - -2
+      - -3
+      - -4
+rem:
+  enabled: true
+  every: 200
+  steps: 8
+  batch: 8
+  seq_len: 32
+  eta: 0.25
+  postsynaptic: delta
+  threshold: 0.0
+  probe_around: false
+task:
+  name: logic
+  tagged: false
+  rules:
+    conjunction:
+      family: conjunction
+      seed: 11
+stream:
+  phases:
+  - rule: conjunction
+    puzzles: 1800
+  batch_size: 4
+  n_shots: 2
+  rule_text: true
+  self_generate: true
+  verifier_mode: honest
+  verifier_fpr: 0.0
+  on_wrong: teach
+  consolidate: verified
+  exposure: both
+  consolidation_repeats: 1
+  probe_every: 50
+  probe_n: 64
+  probe_depth: false
+  seen_window: 48
+  shots_cover_exception: false
+monitor:
+  enabled: true
+  every: 2
+  threshold: 0.15
+  deliberate_frozen: true
+  rollback: false
+  confidence: true
+  save_delta: true
+eval:
+  lm_reference: data/lm_reference.txt
+  cloze: data/cloze.json
+  lm_windows: 24
+  compile_threshold: 0.8
+_comment: 'conjunction, MLP 4L locus, seed 2, 1800 puzzles. The MLP arm is n=1: it
+  sustained theta=0.95 at 759 writes where attention did so in 1 of 3 runs at 1403.
+  That invites "MLP buys deterministic convergence" - which one run cannot support.
+  These give n=3 at the MLP locus so the yield at high theta can actually be compared.'

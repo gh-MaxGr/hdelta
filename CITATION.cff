@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this work, please cite it as below."
+title: "h-delta: online learning from verified work on one consumer GPU"
+type: software
+authors:
+  - name: "MaxGR"
+license: MIT
+abstract: >-
+  A testbed for a language model (Qwen2.5-3B) that learns online from tool-verified work.
+  A bolt-on fast-weight slice is compared with a reason cache, small learners and online LoRA
+  on identical held-out items; LoRA with replay dominates. Also measures a confidence gate and
+  reason-keyed failure memory. Carried out mostly by an AI coding agent under the author's
+  direction.
+keywords:
+  - continual learning
+  - fast weights
+  - LoRA
+  - test-time learning
+  - agent memory

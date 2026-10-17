@@ -1,0 +1,3 @@
+# ablation: hebbian
+plastic:
+  postsynaptic: hebbian

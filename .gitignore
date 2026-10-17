@@ -1,0 +1,8 @@
+.venv/
+results/
+__pycache__/
+*.pt
+*.safetensors
+*.DONE
+*.log
+*.err

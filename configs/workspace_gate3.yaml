@@ -1,0 +1,154 @@
+# Gate 3: does the task recur hundreds of times with distinct cues?
+#
+# Four workspaces interleaved in short blocks that cycle, so every rule is repeatedly
+# revisited rather than learned once in a long run.  The cues are deliberately confusable
+# sibling names sharing the prefix "core-au", which is the case the capacity work prices
+# at roughly one skill; we budget four rules, not the five or six a clean cue set allows.
+#
+# PLASTICITY IS OFF in this config (updates_enabled: false).  This run establishes the
+# cold baseline: tool-call volume with no cache, and confirmation that the monitor reports
+# the uncompiled state across the whole schedule.  Turn updates_enabled on for the real run.
+seed: 0
+
+model:
+  name: Qwen/Qwen2.5-3B-Instruct
+  dtype: bfloat16
+  device: cuda
+
+plastic:
+  max_fraction: 0.05
+  postsynaptic: error
+  update_norm: adam
+  decay_enabled: true
+  homeo_enabled: true
+  updates_enabled: false             # <- COLD.  dW is installed but never written.
+  groups:
+    hdeltaH:
+      patterns:
+        - "model.layers.{L}.self_attn.q_proj"
+        - "model.layers.{L}.self_attn.k_proj"
+        - "model.layers.{L}.self_attn.v_proj"
+        - "model.layers.{L}.self_attn.o_proj"
+      layers: [-1, -2, -3, -4, -5, -6, -7, -8, -9]
+      eta: 0.0001
+      decay: 0.004
+      budget: 0.03
+      homeo_mode: global
+
+rem:
+  enabled: true
+  every: 200
+  steps: 8
+  batch: 8
+  seq_len: 32
+  eta: 0.25
+  postsynaptic: delta
+  threshold: 0.0
+  probe_around: false                # probing either side of every sleep doubles probe cost
+
+task:
+  name: workspace
+  n_packages: 6
+  n_overrides: 2
+  depth: [1, 2]
+  latency_ms: 750
+  sleep: false
+  tagged: true                       # the prompt must say which workspace applies
+  rules:
+    A: {seed: 11, area: libs}        # same area for all four, so the path never reveals
+    B: {seed: 22, area: libs}        # which workspace it belongs to and the tag has to work
+    C: {seed: 33, area: libs}
+    D: {seed: 44, area: libs}
+  tag_map:                           # confusable on purpose: seven shared leading characters
+    A: core-auth
+    B: core-audit
+    C: core-audio
+    D: core-author
+
+stream:
+  # 4 rules x 14 blocks of 25 = 1400 puzzles, 350 per rule, which is the figure the
+  # capacity work gives for a sustained skill under competition.
+  phases:
+    - {rule: A, puzzles: 25}
+    - {rule: B, puzzles: 25}
+    - {rule: C, puzzles: 25}
+    - {rule: D, puzzles: 25}
+    - {rule: A, puzzles: 25}
+    - {rule: B, puzzles: 25}
+    - {rule: C, puzzles: 25}
+    - {rule: D, puzzles: 25}
+    - {rule: A, puzzles: 25}
+    - {rule: B, puzzles: 25}
+    - {rule: C, puzzles: 25}
+    - {rule: D, puzzles: 25}
+    - {rule: A, puzzles: 25}
+    - {rule: B, puzzles: 25}
+    - {rule: C, puzzles: 25}
+    - {rule: D, puzzles: 25}
+    - {rule: A, puzzles: 25}
+    - {rule: B, puzzles: 25}
+    - {rule: C, puzzles: 25}
+    - {rule: D, puzzles: 25}
+    - {rule: A, puzzles: 25}
+    - {rule: B, puzzles: 25}
+    - {rule: C, puzzles: 25}
+    - {rule: D, puzzles: 25}
+    - {rule: A, puzzles: 25}
+    - {rule: B, puzzles: 25}
+    - {rule: C, puzzles: 25}
+    - {rule: D, puzzles: 25}
+    - {rule: A, puzzles: 25}
+    - {rule: B, puzzles: 25}
+    - {rule: C, puzzles: 25}
+    - {rule: D, puzzles: 25}
+    - {rule: A, puzzles: 25}
+    - {rule: B, puzzles: 25}
+    - {rule: C, puzzles: 25}
+    - {rule: D, puzzles: 25}
+    - {rule: A, puzzles: 25}
+    - {rule: B, puzzles: 25}
+    - {rule: C, puzzles: 25}
+    - {rule: D, puzzles: 25}
+    - {rule: A, puzzles: 25}
+    - {rule: B, puzzles: 25}
+    - {rule: C, puzzles: 25}
+    - {rule: D, puzzles: 25}
+    - {rule: A, puzzles: 25}
+    - {rule: B, puzzles: 25}
+    - {rule: C, puzzles: 25}
+    - {rule: D, puzzles: 25}
+    - {rule: A, puzzles: 25}
+    - {rule: B, puzzles: 25}
+    - {rule: C, puzzles: 25}
+    - {rule: D, puzzles: 25}
+    - {rule: A, puzzles: 25}
+    - {rule: B, puzzles: 25}
+    - {rule: C, puzzles: 25}
+    - {rule: D, puzzles: 25}
+  batch_size: 4
+  n_shots: 2
+  rule_text: true                    # the slow path executes a stated table, not induction
+  self_generate: true                # the model produces its own trace; the tool verifies it
+  verifier_mode: honest
+  verifier_fpr: 0.0
+  on_wrong: teach
+  consolidate: verified
+  exposure: both
+  consolidation_repeats: 1
+  probe_every: 100
+  probe_n: 48
+  probe_depth: false
+  seen_window: 48
+
+monitor:
+  enabled: true
+  every: 3                           # the deliberate pass is the costliest probe step
+  threshold: 0.15                    # applied to EXCESS divergence, after the floor
+  deliberate_frozen: true            # reference runs on frozen weights, immune to dW
+  rollback: false                    # nothing to roll back while plasticity is off
+
+eval:
+  lm_reference: data/lm_reference.txt
+  cloze: data/cloze.json
+  lm_windows: 24
+  compile_threshold: 0.8

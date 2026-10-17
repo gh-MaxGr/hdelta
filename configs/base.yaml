@@ -1,0 +1,72 @@
+# h-delta self-upgrade sandbox: base configuration
+seed: 0
+
+model:
+  name: HuggingFaceTB/SmolLM2-135M     # any HF causal LM with nn.Linear projections (Llama/Qwen/GPT-NeoX)
+  dtype: float32                       # fast weights need precision; the model is small
+  device: cuda
+
+plastic:
+  max_fraction: 0.05                   # hard cap on plastic parameters (>= 95 % frozen)
+  postsynaptic: error                  # error (delta rule) | hebbian (y (x) x, as literally written)
+  update_norm: adam                    # adam: per-synapse normalised | frob: fixed quantum per chunk | none: raw
+  decay_enabled: true                  # passive decay (leaky integrator)
+  homeo_enabled: true                  # homeostatic plasticity (energy budget)
+  updates_enabled: true                # false -> frozen control (h-delta present but never written)
+  groups:
+    hdeltaH:                           # "relational" group: attention projections (hippocampal analogue:
+      patterns:                        #  where to look / what to bind)
+        - "model.layers.{L}.self_attn.q_proj"
+        - "model.layers.{L}.self_attn.k_proj"
+        - "model.layers.{L}.self_attn.v_proj"
+        - "model.layers.{L}.self_attn.o_proj"
+      layers: [-1, -2, -3]
+      eta: 0.0005                      # absolute per-synapse step (update_norm=adam)
+      decay: 0.004                     # lambda per puzzle
+      budget: 0.04                     # ||dW||_F <= budget * ||W||_F
+      homeo_mode: global               # global | row | none
+    hdeltaG:                           # "procedural" group: MLP down-projections (basal-ganglia analogue:
+      patterns: ["model.layers.{L}.mlp.down_proj"]   # what to do)
+      layers: [-1, -2, -3]
+      eta: 0.0005
+      decay: 0.004
+      budget: 0.04
+      homeo_mode: global
+
+rem:                                   # simulated REM sleep: anti-Hebbian pruning under Gaussian noise
+  enabled: true
+  every: 100                           # puzzles between sleeps
+  steps: 8                             # noise batches per sleep
+  batch: 8
+  seq_len: 32
+  eta: 0.25                            # fraction of the noise-responsive component removed per step
+  postsynaptic: delta                  # delta (penalise dW x) | full (penalise (W+dW) x)
+  threshold: 0.0                       # only prune modules whose noise-response ratio exceeds this
+
+task:
+  name: cipher
+  length: [3, 3]
+  alphabet_size: 10                    # letters a..j
+  rules:
+    A: [["shift", 3], ["mirror"]]      # two-step procedure; compiles to the reflection x -> 6 - x
+    B: [["shift", 4], ["shift", 3]]    # a different two-step procedure; compiles to the shift x -> x + 7
+                                       # (A and B never agree on any letter, so old-rule answers are unambiguous)
+
+stream:
+  phases:
+    - {rule: A, puzzles: 400}          # learn A
+    - {rule: B, puzzles: 400}          # the rules change: unhook A, compile B
+    - {rule: A, puzzles: 200}          # switch back: savings / re-compilation
+  batch_size: 4                        # puzzles per online update (one "chunk" of the stream)
+  n_shots: 2                           # in-context examples on the slow (excitation) path
+  exposure: both                       # slow | direct | both  (both = slow path + consolidation replay)
+  consolidation_repeats: 1
+  probe_every: 20
+  probe_n: 48
+  seen_window: 48
+
+eval:
+  lm_reference: data/lm_reference.txt
+  cloze: data/cloze.json
+  lm_windows: 24
+  compile_threshold: 0.8

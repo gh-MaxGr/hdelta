@@ -1,0 +1,185 @@
+seed: 0
+model:
+  name: Qwen/Qwen2.5-3B-Instruct
+  dtype: bfloat16
+  device: cuda
+plastic:
+  max_fraction: 0.05
+  postsynaptic: error
+  update_norm: adam
+  decay_enabled: true
+  homeo_enabled: true
+  updates_enabled: true
+  groups:
+    hdeltaH:
+      patterns:
+      - model.layers.{L}.self_attn.q_proj
+      - model.layers.{L}.self_attn.k_proj
+      - model.layers.{L}.self_attn.v_proj
+      - model.layers.{L}.self_attn.o_proj
+      layers:
+      - -1
+      - -2
+      - -3
+      - -4
+      - -5
+      - -6
+      - -7
+      - -8
+      - -9
+      eta: 0.0001
+      decay: 0.004
+      budget: 0.03
+      homeo_mode: global
+rem:
+  enabled: true
+  every: 200
+  steps: 8
+  batch: 8
+  seq_len: 32
+  eta: 0.25
+  postsynaptic: delta
+  threshold: 0.0
+  probe_around: false
+task:
+  name: world
+  tagged: true
+  baseline_n: 8
+  rules:
+    trader:
+      family: trader
+    diplomat:
+      family: diplomat
+    hardliner:
+      family: hardliner
+  tag_map:
+    trader: trader
+    diplomat: diplomat
+    hardliner: hardliner
+stream:
+  phases:
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  batch_size: 4
+  n_shots: 2
+  rule_text: true
+  self_generate: true
+  verifier_mode: honest
+  verifier_fpr: 0.0
+  on_wrong: positive
+  consolidate: verified
+  exposure: both
+  consolidation_repeats: 1
+  gen_max_new: 160
+  probe_every: 50
+  probe_n: 48
+  probe_depth: false
+  free_probe: false
+  seen_window: 48
+monitor:
+  enabled: true
+  every: 2
+  threshold: 0.15
+  deliberate_frozen: true
+  rollback: false
+  confidence: false
+  save_delta: true
+  max_new_deliberate: 192
+eval:
+  lm_reference: data/lm_reference.txt
+  cloze: data/cloze.json
+  lm_windows: 24
+  compile_threshold: 0.8
+_comment: 'ABLATION arm: graded reward, NO punishment. Third rung of a ladder whose other two already
+  exist. skip (results/world) writes every verified item with the same eta; this writes only items with
+  positive advantage, weighted by it; contrast (configs/world_contrast.yaml) writes everything, signed,
+  plus a contrastive alternative. If THIS alone prevents the REFUSE x48 collapse, the missing ingredient
+  was gradation and punishment is unnecessary - which is the cheaper and more surprising result.'

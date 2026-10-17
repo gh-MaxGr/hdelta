@@ -1,0 +1,3 @@
+# ablation: no_decay
+plastic:
+  decay_enabled: false

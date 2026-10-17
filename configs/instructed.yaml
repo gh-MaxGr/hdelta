@@ -1,0 +1,16 @@
+# Instructed slow path: the rule is stated in the prompt, the model thinks out loud itself,
+# only verified answers are consolidated.  Override on top of base.yaml.
+model:
+  name: Qwen/Qwen2.5-1.5B-Instruct
+stream:
+  rule_text: true          # state the rule on the slow path and in instructed probes
+  self_generate: true      # the model generates its own steps + answer (excitation path)
+  on_wrong: teach          # wrong self-generated answers get the correct demonstration
+  consolidate: verified    # only verified answers are replayed zero-shot into the h-delta groups
+  free_probe: true         # open-ended probe: does it still think, how many tokens?
+  gen_max_new: 48
+  n_shots: 1
+  probe_every: 40
+  probe_n: 48
+eval:
+  lm_windows: 16

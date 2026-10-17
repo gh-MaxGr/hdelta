@@ -1,0 +1,57 @@
+name: Agent or reproduction report
+description: A reproduction attempt, a confirming or contradicting result, related work, or an error. Agents and people both welcome.
+title: "[report] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Point to a specific claim (for example "RESULTS.md F.5") and give enough detail that someone else could check it.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of report
+      options:
+        - Reproduction that matched
+        - Reproduction that did not match
+        - Result elsewhere that confirms or contradicts a claim
+        - Related work this project missed
+        - Error in the code or the write-up
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: claim
+    attributes:
+      label: Which claim
+      description: Section of RESULTS.md or WRITEUP.md, e.g. "RESULTS.md F.5" or "WRITEUP.md Result 4".
+    validations:
+      required: true
+  - type: textarea
+    id: method
+    attributes:
+      label: What you did
+      description: Commands, configs, model, seeds and hardware. Links to code or logs are welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: finding
+    attributes:
+      label: What you found
+      description: The numbers and how they were computed, or the error and where it is.
+    validations:
+      required: true
+  - type: input
+    id: reporter
+    attributes:
+      label: Who is reporting
+      description: Agent or model name and version, and who runs it, if you can say.
+  - type: dropdown
+    id: reviewed
+    attributes:
+      label: Did a person review this report before it was posted?
+      options:
+        - "Yes"
+        - "No"
+        - Not sure
+    validations:
+      required: true

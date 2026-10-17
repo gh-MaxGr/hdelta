@@ -1,0 +1,187 @@
+seed: 0
+model:
+  name: Qwen/Qwen2.5-3B-Instruct
+  dtype: bfloat16
+  device: cuda
+plastic:
+  max_fraction: 0.05
+  postsynaptic: error
+  update_norm: adam
+  decay_enabled: true
+  homeo_enabled: true
+  updates_enabled: true
+  groups:
+    hdeltaH:
+      patterns:
+      - model.layers.{L}.self_attn.q_proj
+      - model.layers.{L}.self_attn.k_proj
+      - model.layers.{L}.self_attn.v_proj
+      - model.layers.{L}.self_attn.o_proj
+      layers:
+      - -1
+      - -2
+      - -3
+      - -4
+      - -5
+      - -6
+      - -7
+      - -8
+      - -9
+      eta: 0.0001
+      decay: 0.004
+      budget: 0.03
+      homeo_mode: global
+rem:
+  enabled: true
+  every: 200
+  steps: 8
+  batch: 8
+  seq_len: 32
+  eta: 0.25
+  postsynaptic: delta
+  threshold: 0.0
+  probe_around: false
+task:
+  name: world
+  tagged: true
+  baseline_n: 8
+  rules:
+    trader:
+      family: trader
+    diplomat:
+      family: diplomat
+    hardliner:
+      family: hardliner
+  tag_map:
+    trader: trader
+    diplomat: diplomat
+    hardliner: hardliner
+stream:
+  phases:
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  - rule: trader
+    puzzles: 24
+  - rule: diplomat
+    puzzles: 24
+  - rule: hardliner
+    puzzles: 24
+  batch_size: 4
+  n_shots: 2
+  rule_text: true
+  self_generate: true
+  verifier_mode: honest
+  verifier_fpr: 0.0
+  on_wrong: skip
+  consolidate: verified
+  exposure: both
+  consolidation_repeats: 1
+  gen_max_new: 160
+  probe_every: 50
+  probe_n: 48
+  probe_depth: false
+  free_probe: false
+  seen_window: 48
+monitor:
+  enabled: true
+  every: 2
+  threshold: 0.15
+  deliberate_frozen: true
+  rollback: false
+  confidence: false
+  save_delta: true
+  max_new_deliberate: 192
+eval:
+  lm_reference: data/lm_reference.txt
+  cloze: data/cloze.json
+  lm_windows: 24
+  compile_threshold: 0.8
+_comment: 'Three DISPOSITIONS, not three situations: the same offer has different right answers for a
+  trader, a diplomat and a hardliner, and they disagree on 43% of situations. The engine scores OUTCOMES
+  - it applies a move and evaluates the resulting world - so unlike every earlier task here the verifier
+  does not contain the answer. on_wrong: skip, so only moves the model found itself and the engine verified
+  are written. Read results against world.CONSTANT_FLOOR (trader 0.46, diplomat 0.70, hardliner 0.58),
+  never against random: a disposition scoring at or below its best constant policy has collapsed. Enumerated
+  reference is 1.00.'

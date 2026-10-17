@@ -1,0 +1,79 @@
+# MUTANTS: will the module's own stdlib test suite catch this code change? (mutgen.py data)
+# Tool as teacher: every stream mutant is labelled by actually running its tests (stored by mutgen.py)
+# and written straight into the fast weights (exposure: direct). Balanced 50/50 caught/survived
+# for the stream AND the probes; held-out = unseen top-level functions/classes (disjoint).
+# The plastic recipe is the conjunction baseline (attention, last 9 layers, eta 1e-4).
+seed: 0
+model:
+  name: Qwen/Qwen2.5-3B-Instruct
+  dtype: bfloat16
+  device: cuda
+plastic:
+  max_fraction: 0.05
+  postsynaptic: error
+  update_norm: adam
+  decay_enabled: true
+  homeo_enabled: true
+  updates_enabled: true
+  groups:
+    hdeltaH:
+      patterns:
+        - model.layers.{L}.self_attn.q_proj
+        - model.layers.{L}.self_attn.k_proj
+        - model.layers.{L}.self_attn.v_proj
+        - model.layers.{L}.self_attn.o_proj
+      layers: [-1, -2, -3, -4, -5, -6, -7, -8, -9]
+      eta: 0.0001
+      decay: 0.004
+      budget: 0.03
+      homeo_mode: global
+rem:
+  enabled: true
+  every: 200
+  steps: 8
+  batch: 8
+  seq_len: 32
+  eta: 0.25
+  postsynaptic: delta
+  threshold: 0.0
+  probe_around: false
+task:
+  name: mutants
+  # pinned so the pool is fixed whatever else is on disk (statistics excluded: 12 s per mutant)
+  modules: [fractions, colorsys, shlex, calendar, configparser, ipaddress, graphlib, optparse,
+            plistlib, getopt, netrc, sched, filecmp, quopri, pickletools, base64, tabnanny]
+  heldout_mod: 4
+  balance: 0.5
+  context: true            # show the mutated function (mut_context.py) as well as the diff
+  rules:
+    mut: {}
+stream:
+  phases:
+    - rule: mut
+      puzzles: 8000
+  batch_size: 4
+  n_shots: 0
+  rule_text: false
+  self_generate: false
+  probe_minimal: true
+  free_probe: false
+  exposure: direct
+  consolidate: all
+  consolidation_repeats: 1
+  verifier_mode: honest
+  verifier_fpr: 0.0
+  on_wrong: teach
+  probe_every: 250
+  probe_n: 200
+  probe_depth: false
+  seen_window: 64
+monitor:
+  enabled: false
+  confidence: true
+  save_delta: true
+eval:
+  lm_reference: data/lm_reference.txt
+  cloze: data/cloze.json
+  lm_windows: 24
+  compile_threshold: 0.8
+_comment: "mutants + function context, seed 0, 8000 draws"

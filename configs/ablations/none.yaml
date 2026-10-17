@@ -1,0 +1,6 @@
+# ablation: none
+plastic:
+  decay_enabled: false
+  homeo_enabled: false
+rem:
+  enabled: false

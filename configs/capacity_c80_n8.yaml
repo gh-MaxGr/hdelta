@@ -1,0 +1,629 @@
+seed: 0
+model:
+  name: Qwen/Qwen2.5-3B-Instruct
+  dtype: bfloat16
+  device: cuda
+plastic:
+  max_fraction: 0.05
+  postsynaptic: error
+  update_norm: adam
+  decay_enabled: true
+  homeo_enabled: true
+  updates_enabled: true
+  groups:
+    hdeltaH:
+      patterns:
+      - model.layers.{L}.self_attn.q_proj
+      - model.layers.{L}.self_attn.k_proj
+      - model.layers.{L}.self_attn.v_proj
+      - model.layers.{L}.self_attn.o_proj
+      layers:
+      - -1
+      - -2
+      - -3
+      eta: 0.0001
+      decay: 0.004
+      budget: 0.03
+      homeo_mode: global
+    hdeltaG:
+      patterns:
+      - model.layers.{L}.mlp.down_proj
+      layers:
+      - -1
+      - -2
+      - -3
+      eta: 0.0001
+      decay: 0.004
+      budget: 0.03
+      homeo_mode: global
+rem:
+  enabled: true
+  every: 100
+  steps: 8
+  batch: 8
+  seq_len: 32
+  eta: 0.25
+  postsynaptic: delta
+  threshold: 0.0
+  probe_around: false
+task:
+  name: cipher
+  alphabet: digits
+  alphabet_size: 10
+  length:
+  - 3
+  - 3
+  tagged: true
+  rules:
+    A7:
+    - - shift
+      - 4
+    - - shift
+      - 3
+    M6:
+    - - shift
+      - 3
+    - - mirror
+    A3:
+    - - shift
+      - 1
+    - - shift
+      - 2
+    M2:
+    - - shift
+      - 7
+    - - mirror
+    A9:
+    - - shift
+      - 5
+    - - shift
+      - 4
+    M4:
+    - - shift
+      - 5
+    - - mirror
+    A1:
+    - - shift
+      - 6
+    - - shift
+      - 5
+    M8:
+    - - shift
+      - 1
+    - - mirror
+stream:
+  phases:
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  - rule: A7
+    puzzles: 10
+  - rule: M6
+    puzzles: 10
+  - rule: A3
+    puzzles: 10
+  - rule: M2
+    puzzles: 10
+  - rule: A9
+    puzzles: 10
+  - rule: M4
+    puzzles: 10
+  - rule: A1
+    puzzles: 10
+  - rule: M8
+    puzzles: 10
+  batch_size: 4
+  n_shots: 4
+  exposure: both
+  consolidation_repeats: 1
+  probe_every: 40
+  probe_n: 32
+  seen_window: 48
+  rule_text: true
+  self_generate: true
+  on_wrong: teach
+  consolidate: verified
+  free_probe: false
+  gen_max_new: 40
+  probe_depth: false
+eval:
+  lm_reference: data/lm_reference.txt
+  cloze: data/cloze.json
+  lm_windows: 12
+  compile_threshold: 0.8
+_comment: 'capacity test: 8 tagged rules interleaved in 10-puzzle blocks, 32 cycles,
+  320 puzzles per rule, 2560 total; worst pairwise per-digit agreement 0%. Standalone
+  config: run with --config, not --override.'

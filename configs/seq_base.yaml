@@ -1,0 +1,91 @@
+# SEQUENTIAL: snippets -> mutants -> snippets, both skills probed at every probe. Every
+# stationary comparison favoured LoRA or a tiny learner; decay and homeostasis were built for
+# several skills arriving in sequence, so this is the fast weights' last possible niche.
+# Retention (snippets while mutants are learned) and acquisition read off one run.
+seed: 0
+model:
+  name: Qwen/Qwen2.5-3B-Instruct
+  dtype: bfloat16
+  device: cuda
+plastic:
+  max_fraction: 0.05
+  postsynaptic: error
+  update_norm: adam
+  decay_enabled: true
+  homeo_enabled: true
+  updates_enabled: true
+  groups:
+    hdeltaH:
+      patterns:
+        - model.layers.{L}.self_attn.q_proj
+        - model.layers.{L}.self_attn.k_proj
+        - model.layers.{L}.self_attn.v_proj
+        - model.layers.{L}.self_attn.o_proj
+      layers: [-1, -2, -3, -4, -5, -6, -7, -8, -9]
+      eta: 0.0001
+      decay: 0.004
+      budget: 0.03
+      homeo_mode: global
+rem:
+  enabled: true
+  every: 200
+  steps: 8
+  batch: 8
+  seq_len: 32
+  eta: 0.25
+  postsynaptic: delta
+  threshold: 0.0
+  probe_around: false
+task:
+  name: composite
+  rules:
+    snip:
+      task:
+        name: snippets
+        heldout_mod: 4
+        balance: 0.5
+        rules:
+          snip: {}
+    mut:
+      task:
+        name: mutants
+        modules: [fractions, colorsys, shlex, calendar, configparser, ipaddress, graphlib, optparse, plistlib,
+          getopt, netrc, sched, filecmp, quopri, pickletools, base64, tabnanny]
+        heldout_mod: 4
+        balance: 0.5
+        rules:
+          mut: {}
+stream:
+  phases:
+    - rule: snip
+      puzzles: 4000
+    - rule: mut
+      puzzles: 4000
+    - rule: snip
+      puzzles: 2000
+  batch_size: 4
+  n_shots: 0
+  rule_text: false
+  self_generate: false
+  probe_minimal: true
+  free_probe: false
+  exposure: direct
+  consolidate: all
+  consolidation_repeats: 1
+  verifier_mode: honest
+  verifier_fpr: 0.0
+  on_wrong: teach
+  probe_every: 250
+  probe_n: 200
+  probe_depth: false
+  seen_window: 64
+monitor:
+  enabled: false
+  confidence: true
+  save_delta: true
+eval:
+  lm_reference: data/lm_reference.txt
+  cloze: data/cloze.json
+  lm_windows: 24
+  compile_threshold: 0.8
+_comment: "sequential snip 4000 -> mut 4000 -> snip 2000, baseline recipe, seed 0"

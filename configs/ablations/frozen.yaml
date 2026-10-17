@@ -1,0 +1,5 @@
+# ablation: frozen
+plastic:
+  updates_enabled: false
+rem:
+  enabled: false

@@ -1,0 +1,40 @@
+# ablation: routing
+task:
+  name: routing
+  min_hops: 2
+  max_hops: 3
+  rules:
+    A:
+    - - A
+      - B
+    - - B
+      - C
+    - - C
+      - D
+    - - D
+      - E
+    - - E
+      - F
+    - - A
+      - G
+    - - G
+      - H
+    - - H
+      - F
+    B:
+    - - A
+      - D
+    - - D
+      - B
+    - - B
+      - F
+    - - F
+      - C
+    - - C
+      - E
+    - - A
+      - H
+    - - H
+      - G
+    - - G
+      - E

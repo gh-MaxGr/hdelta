@@ -1,0 +1,62 @@
+# Gate A for open question #2: can the audit hook run against a LoRA instead of h-delta?
+#
+# ARCHITECTURAL SANITY ONLY. Nothing is trained and nothing is measured about transfer.
+# The single question is whether PEFT gives a frozen reference that is genuinely frozen,
+# because `CompiledMonitor` is only sound if the deliberate path is uncontaminated by the
+# thing it is auditing - a corrupted reflex that can drag the reference onto its own wrong
+# answer keeps divergence at zero and the guard never fires.
+#
+# The task is `workspace`, not a logic family, and that is deliberate. Binning
+# mon_agree_wrong by compiled accuracy WITHIN each run: workspace grows 6/6 runs
+# (0.023-0.027 -> 0.054-0.119), logic 0/11. The blind spot the hook exists to expose does
+# not occur on the logic families, so a transfer test built there would show a flat zero
+# and falsely certify the hook.
+#
+# Locus matches hdeltaH exactly - q/k/v/o on the top 9 layers, 36 modules - so Gate B
+# compares like with like.
+seed: 0
+
+model:
+  name: Qwen/Qwen2.5-3B-Instruct
+  dtype: bfloat16
+  device: cuda
+
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.0                  # must be 0: dropout makes the forward pass stochastic and
+                                # the exactness check below would measure the dropout mask
+  layers: [-1, -2, -3, -4, -5, -6, -7, -8, -9]
+  projections: [q_proj, k_proj, v_proj, o_proj]
+  expect_modules: 36            # 9 layers x 4 projections; if PEFT matches fewer, the
+                                # target pattern silently missed and every check below
+                                # would pass vacuously against an empty adapter
+
+gate_a:
+  n_logit_prompts: 8            # prompts for the exactness checks
+  n_monitor_puzzles: 12         # puzzles for the one live monitor call
+  perturb_scale: 0.02           # nonzero lora_B, so "disabled == base" is a real test and
+                                # not the trivial pass a zero-initialised adapter gives
+
+task:
+  name: workspace
+  n_packages: 6
+  n_overrides: 2
+  depth: [1, 2]
+  latency_ms: 750
+  sleep: false
+  tagged: true
+  rules:
+    A: {seed: 11, area: libs}
+    B: {seed: 22, area: libs}
+    C: {seed: 33, area: libs}
+    D: {seed: 44, area: libs}
+  tag_map:
+    A: core-auth
+    B: core-audit
+    C: core-audio
+    D: core-author
+
+monitor:
+  threshold: 0.15
+  deliberate_frozen: true

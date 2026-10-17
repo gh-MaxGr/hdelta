@@ -1,0 +1,183 @@
+seed: 0
+model:
+  name: Qwen/Qwen2.5-3B-Instruct
+  dtype: bfloat16
+  device: cuda
+plastic:
+  max_fraction: 0.05
+  postsynaptic: error
+  update_norm: adam
+  decay_enabled: true
+  homeo_enabled: true
+  updates_enabled: true
+  groups:
+    hdeltaH:
+      patterns:
+      - model.layers.{L}.self_attn.q_proj
+      - model.layers.{L}.self_attn.k_proj
+      - model.layers.{L}.self_attn.v_proj
+      - model.layers.{L}.self_attn.o_proj
+      layers:
+      - -1
+      - -2
+      - -3
+      - -4
+      - -5
+      - -6
+      - -7
+      - -8
+      - -9
+      eta: 0.0001
+      decay: 0.004
+      budget: 0.03
+      homeo_mode: global
+rem:
+  enabled: true
+  every: 200
+  steps: 8
+  batch: 8
+  seq_len: 32
+  eta: 0.25
+  postsynaptic: delta
+  threshold: 0.0
+  probe_around: false
+task:
+  name: repoidiom
+  tagged: false
+  rules:
+    launch:
+      family: launch
+    gate:
+      family: gate
+    invoke:
+      family: invoke
+stream:
+  phases:
+  - rule: launch
+    puzzles: 24
+  - rule: gate
+    puzzles: 24
+  - rule: invoke
+    puzzles: 24
+  - rule: launch
+    puzzles: 24
+  - rule: gate
+    puzzles: 24
+  - rule: invoke
+    puzzles: 24
+  - rule: launch
+    puzzles: 24
+  - rule: gate
+    puzzles: 24
+  - rule: invoke
+    puzzles: 24
+  - rule: launch
+    puzzles: 24
+  - rule: gate
+    puzzles: 24
+  - rule: invoke
+    puzzles: 24
+  - rule: launch
+    puzzles: 24
+  - rule: gate
+    puzzles: 24
+  - rule: invoke
+    puzzles: 24
+  - rule: launch
+    puzzles: 24
+  - rule: gate
+    puzzles: 24
+  - rule: invoke
+    puzzles: 24
+  - rule: launch
+    puzzles: 24
+  - rule: gate
+    puzzles: 24
+  - rule: invoke
+    puzzles: 24
+  - rule: launch
+    puzzles: 24
+  - rule: gate
+    puzzles: 24
+  - rule: invoke
+    puzzles: 24
+  - rule: launch
+    puzzles: 24
+  - rule: gate
+    puzzles: 24
+  - rule: invoke
+    puzzles: 24
+  - rule: launch
+    puzzles: 24
+  - rule: gate
+    puzzles: 24
+  - rule: invoke
+    puzzles: 24
+  - rule: launch
+    puzzles: 24
+  - rule: gate
+    puzzles: 24
+  - rule: invoke
+    puzzles: 24
+  - rule: launch
+    puzzles: 24
+  - rule: gate
+    puzzles: 24
+  - rule: invoke
+    puzzles: 24
+  - rule: launch
+    puzzles: 24
+  - rule: gate
+    puzzles: 24
+  - rule: invoke
+    puzzles: 24
+  - rule: launch
+    puzzles: 24
+  - rule: gate
+    puzzles: 24
+  - rule: invoke
+    puzzles: 24
+  - rule: launch
+    puzzles: 24
+  - rule: gate
+    puzzles: 24
+  - rule: invoke
+    puzzles: 24
+  batch_size: 4
+  n_shots: 2
+  rule_text: true
+  self_generate: true
+  verifier_mode: honest
+  verifier_fpr: 0.0
+  on_wrong: teach
+  consolidate: verified
+  exposure: both
+  consolidation_repeats: 1
+  gen_max_new: 220
+  probe_every: 50
+  probe_n: 48
+  probe_depth: false
+  free_probe: false
+  seen_window: 48
+monitor:
+  enabled: true
+  every: 2
+  threshold: 0.15
+  deliberate_frozen: true
+  rollback: false
+  confidence: false
+  save_delta: true
+  max_new_deliberate: 256
+eval:
+  lm_reference: data/lm_reference.txt
+  cloze: data/cloze.json
+  lm_windows: 24
+  compile_threshold: 0.8
+_comment: Three real conventions from this repo's CLAUDE.md (the coding assistant's instruction file), each written down because
+  the model could not produce it cold. rule_text states the convention on the slow path; the compiled
+  path gets the bare task with an EMPTY context. Stream and probes draw from DISJOINT halves of the input
+  pools (see repoidiom._pools), so held-out accuracy cannot be satisfied by recalling a trained string
+  - v1 had 14 markers and 18 scripts against 360 stream puzzles per rule and measured a cached dictionary.
+  monitor.max_new_deliberate=256 because the default 64 truncates the reference on two of three rules,
+  which read as deliberate=0.00 and is an apparatus artefact, not a finding. 3 rules is inside the ~6-skill
+  capacity limit; attention locus because these are associative mappings, ~0.46% ppl against MLP's ~3.06%.
